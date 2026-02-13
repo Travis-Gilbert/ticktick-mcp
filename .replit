@@ -1,0 +1,6 @@
+run = "pip install -q mcp httpx python-dotenv pydantic fastmcp && python -m ticktick_mcp"
+language = "python3"
+entrypoint = "ticktick_mcp/__main__.py"
+
+[env]
+PYTHONUNBUFFERED = "1"
