@@ -324,3 +324,171 @@ class MoveTaskInput(BaseModel):
     task_id: str = Field(..., description="Task ID to move", min_length=1)
     from_project_id: str = Field(..., description="Current project ID", min_length=1)
     to_project_id: str = Field(..., description="Destination project ID", min_length=1)
+
+
+# ---------------------------------------------------------------------------
+# Smart Query Models (Phase 2)
+# ---------------------------------------------------------------------------
+
+class GetTasksDueTodayInput(BaseModel):
+    """Input for listing tasks due today across all projects."""
+    model_config = _STRICT_CONFIG
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class GetOverdueTasksInput(BaseModel):
+    """Input for listing overdue tasks across all projects."""
+    model_config = _STRICT_CONFIG
+    include_no_date: bool = Field(
+        default=False,
+        description="Include tasks with no due date (often forgotten tasks)",
+    )
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class SearchAllTasksInput(BaseModel):
+    """Input for searching tasks across ALL projects."""
+    model_config = _STRICT_CONFIG
+    query: str = Field(min_length=1, max_length=200, description="Text to search in title and content")
+    priority: TaskPriority | None = Field(default=None)
+    include_completed: bool = Field(default=False)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class GetEngagedTasksInput(BaseModel):
+    """Input for GTD 'Engaged' list: high priority OR overdue."""
+    model_config = _STRICT_CONFIG
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class PlanDayInput(BaseModel):
+    """Input for day planning tool."""
+    model_config = _STRICT_CONFIG
+    available_hours: float = Field(
+        ge=0.5, le=24.0,
+        description="How many hours of work time you have today",
+    )
+    priorities: list[str] | None = Field(
+        default=None,
+        description="Optional: project names or tags to prioritize",
+    )
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+# ---------------------------------------------------------------------------
+# Daily Standup & Review Models (Phase 3)
+# ---------------------------------------------------------------------------
+
+class DailyStandupInput(BaseModel):
+    """Input for daily standup briefing."""
+    model_config = _STRICT_CONFIG
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class WeeklyReviewInput(BaseModel):
+    """Input for weekly review analysis."""
+    model_config = _STRICT_CONFIG
+    week_offset: int = Field(
+        default=0,
+        ge=-52, le=0,
+        description="0 = this week, -1 = last week, etc.",
+    )
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+# ---------------------------------------------------------------------------
+# Focus / Pomodoro Models (Phase 4)
+# ---------------------------------------------------------------------------
+
+class GetFocusStatsInput(BaseModel):
+    """Input for focus/pomodoro statistics."""
+    model_config = _STRICT_CONFIG
+    period: str = Field(
+        default="today",
+        description="Time period: 'today', 'week', 'month', or 'year'",
+        pattern="^(today|week|month|year)$",
+    )
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class GetFocusHeatmapInput(BaseModel):
+    """Input for focus duration heatmap."""
+    model_config = _STRICT_CONFIG
+    date_from: str = Field(description="Start date in YYYYMMDD format (e.g., '20260201')")
+    date_to: str = Field(description="End date in YYYYMMDD format (e.g., '20260213')")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class GetFocusDistributionInput(BaseModel):
+    """Input for focus time distribution by tag."""
+    model_config = _STRICT_CONFIG
+    date_from: str = Field(description="Start date in YYYYMMDD format")
+    date_to: str = Field(description="End date in YYYYMMDD format")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class GetProductivityScoreInput(BaseModel):
+    """Input for productivity score and general statistics."""
+    model_config = _STRICT_CONFIG
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+# ---------------------------------------------------------------------------
+# Habit Models (Phase 5)
+# ---------------------------------------------------------------------------
+
+class ListHabitsInput(BaseModel):
+    """Input for listing all habits."""
+    model_config = _STRICT_CONFIG
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class CheckinHabitInput(BaseModel):
+    """Input for checking in a habit."""
+    model_config = _STRICT_CONFIG
+    habit_id: str = Field(min_length=1, description="Habit ID")
+    date: str | None = Field(
+        default=None,
+        description="Date in YYYYMMDD format (defaults to today)",
+    )
+    value: float | None = Field(
+        default=None,
+        description="For quantitative habits (e.g., glasses of water). Omit for boolean habits.",
+    )
+
+
+class GetHabitStatsInput(BaseModel):
+    """Input for habit statistics."""
+    model_config = _STRICT_CONFIG
+    habit_id: str = Field(min_length=1, description="Habit ID")
+    days: int = Field(
+        default=30,
+        ge=7, le=365,
+        description="Number of days of history to analyze",
+    )
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+# ---------------------------------------------------------------------------
+# Tag Models (Phase 6)
+# ---------------------------------------------------------------------------
+
+class ListTagsInput(BaseModel):
+    """Input for listing all tags."""
+    model_config = _STRICT_CONFIG
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class CreateTagInput(BaseModel):
+    """Input for creating a tag."""
+    model_config = _STRICT_CONFIG
+    name: str = Field(min_length=1, max_length=100, description="Tag name")
+    color: str | None = Field(default=None, pattern=r"^#[0-9a-fA-F]{6}$")
+    parent: str | None = Field(default=None, description="Parent tag name for nesting")
+
+
+class RenameTagInput(BaseModel):
+    """Input for renaming a tag."""
+    model_config = _STRICT_CONFIG
+    old_name: str = Field(min_length=1, description="Current tag name")
+    new_name: str = Field(min_length=1, description="New tag name")
