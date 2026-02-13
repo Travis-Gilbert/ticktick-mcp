@@ -13,7 +13,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 from ticktick_mcp.client import TickTickClient, TickTickAPIError
 from ticktick_mcp.formatting import (
