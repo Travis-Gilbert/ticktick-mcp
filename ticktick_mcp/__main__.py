@@ -1,8 +1,7 @@
 """Entry point for `python -m ticktick_mcp`."""
 
 import os
-
-from ticktick_mcp.server import mcp
+port = int(os.environ.get("PORT", 8000))
 
 transport = os.environ.get("MCP_TRANSPORT", "stdio")
 
