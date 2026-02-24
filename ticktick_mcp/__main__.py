@@ -1,4 +1,3 @@
-cat > ticktick_mcp/__main__.py << 'EOF'
 """Entry point for `python -m ticktick_mcp`."""
 
 import os
