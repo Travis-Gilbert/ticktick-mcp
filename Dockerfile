@@ -15,4 +15,3 @@ ENV MCP_TRANSPORT=sse
 
 # Start the MCP server
 CMD ["python", "-m", "ticktick_mcp"]
-EOF

@@ -10,4 +10,3 @@ if transport == "stdio":
 else:
     port = int(os.environ.get("PORT", "8000"))
     mcp.run(transport=transport, host="0.0.0.0", port=port)
-EOF
