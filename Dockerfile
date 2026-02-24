@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir .
 
 # Railway injects PORT as an env var
 ENV PORT=8000
-ENV MCP_TRANSPORT=sse
+ENV MCP_TRANSPORT=streamable-http
 
 # Start the MCP server
 CMD ["python", "-m", "ticktick_mcp"]
