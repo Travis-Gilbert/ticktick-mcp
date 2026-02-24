@@ -17,7 +17,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from typing import AsyncIterator
 
-# Old from fastmcp import FastMCP, Context  # New from fastmcp import FastMCP, Context, 
+from fastmcp import FastMCP, Context
 
 from ticktick_mcp.client import TickTickClient, TickTickAPIError
 from ticktick_mcp.v2_client import TickTickV2Client, V2AuthError
