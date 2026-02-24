@@ -2,7 +2,7 @@
 
 Provides ~30 tools for interacting with the TickTick API (V1 + V2).
 Designed for use as a stdio MCP server in Claude Desktop or Claude Code,
-and as an SSE server on Replit for remote access.
+and as an Streamable HHTP on Raliway for remote access.
 
 Usage:
     python -m ticktick_mcp          # stdio transport (default)
@@ -185,7 +185,7 @@ def _get_v2_client(ctx) -> TickTickV2Client:
         "openWorldHint": True,
     },
 )
-async def ticktick_list_projects(params: ListProjectsInput, ctx=None) -> str:
+async def ticktick_list_projects(params: ListProjectsInput, ctx: Context) -> str:
     """List all TickTick projects/lists for the authenticated user.
 
     Returns project names, IDs, colors, and view modes. Use this first
@@ -221,7 +221,7 @@ async def ticktick_list_projects(params: ListProjectsInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_get_project(params: GetProjectInput, ctx=None) -> str:
+async def ticktick_get_project(params: GetProjectInput, ctx: Context) -> str:
     """Get a TickTick project and all its tasks.
 
     Returns the project metadata plus every task in the project,
@@ -262,7 +262,7 @@ async def ticktick_get_project(params: GetProjectInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_create_project(params: CreateProjectInput, ctx=None) -> str:
+async def ticktick_create_project(params: CreateProjectInput, ctx: Context) -> str:
     """Create a new TickTick project/list.
 
     Args:
@@ -301,7 +301,7 @@ async def ticktick_create_project(params: CreateProjectInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_update_project(params: UpdateProjectInput, ctx=None) -> str:
+async def ticktick_update_project(params: UpdateProjectInput, ctx: Context) -> str:
     """Update an existing TickTick project's properties.
 
     Only the fields you provide will be changed; others remain untouched.
@@ -349,7 +349,7 @@ async def ticktick_update_project(params: UpdateProjectInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_delete_project(params: DeleteProjectInput, ctx=None) -> str:
+async def ticktick_delete_project(params: DeleteProjectInput, ctx: Context) -> str:
     """Permanently delete a TickTick project and all its tasks.
 
     WARNING: This is irreversible. All tasks in the project will be deleted.
@@ -383,7 +383,7 @@ async def ticktick_delete_project(params: DeleteProjectInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_get_task(params: GetTaskInput, ctx=None) -> str:
+async def ticktick_get_task(params: GetTaskInput, ctx: Context) -> str:
     """Get a single TickTick task by its project ID and task ID.
 
     Returns full task details including title, content, priority,
@@ -418,7 +418,7 @@ async def ticktick_get_task(params: GetTaskInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_search_tasks(params: SearchTasksInput, ctx=None) -> str:
+async def ticktick_search_tasks(params: SearchTasksInput, ctx: Context) -> str:
     """Search for tasks within a TickTick project.
 
     Fetches all tasks in the project and filters locally by text query,
@@ -477,7 +477,7 @@ async def ticktick_search_tasks(params: SearchTasksInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_create_task(params: CreateTaskInput, ctx=None) -> str:
+async def ticktick_create_task(params: CreateTaskInput, ctx: Context) -> str:
     """Create a new task in a TickTick project.
 
     Supports all task properties: title, content, priority, dates,
@@ -513,7 +513,7 @@ async def ticktick_create_task(params: CreateTaskInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_update_task(params: UpdateTaskInput, ctx=None) -> str:
+async def ticktick_update_task(params: UpdateTaskInput, ctx: Context) -> str:
     """Update an existing TickTick task.
 
     Only the fields you provide will be changed. You must always provide
@@ -575,7 +575,7 @@ async def ticktick_update_task(params: UpdateTaskInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_complete_task(params: CompleteTaskInput, ctx=None) -> str:
+async def ticktick_complete_task(params: CompleteTaskInput, ctx: Context) -> str:
     """Mark a TickTick task as completed.
 
     Args:
@@ -605,7 +605,7 @@ async def ticktick_complete_task(params: CompleteTaskInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_delete_task(params: DeleteTaskInput, ctx=None) -> str:
+async def ticktick_delete_task(params: DeleteTaskInput, ctx: Context) -> str:
     """Permanently delete a TickTick task.
 
     WARNING: This is irreversible. The task and its subtasks will be removed.
@@ -634,7 +634,7 @@ async def ticktick_delete_task(params: DeleteTaskInput, ctx=None) -> str:
         "openWorldHint": True,
     },
 )
-async def ticktick_batch_create_tasks(params: BatchCreateTasksInput, ctx=None) -> str:
+async def ticktick_batch_create_tasks(params: BatchCreateTasksInput, ctx: Context) -> str:
     """Create multiple TickTick tasks at once in a single API call.
 
     All tasks are created in the same project. More efficient than
@@ -674,7 +674,7 @@ async def ticktick_batch_create_tasks(params: BatchCreateTasksInput, ctx=None) -
         "openWorldHint": True,
     },
 )
-async def ticktick_move_task(params: MoveTaskInput, ctx=None) -> str:
+async def ticktick_move_task(params: MoveTaskInput, ctx: Context) -> str:
     """Move a task from one project to another.
 
     Fetches the task, updates its projectId, and saves it to the new project.
@@ -733,7 +733,7 @@ async def _fetch_all_tasks(ctx) -> tuple[list[dict], dict[str, str]]:
     name="ticktick_get_tasks_due_today",
     annotations={"title": "Tasks Due Today", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_get_tasks_due_today(params: GetTasksDueTodayInput, ctx=None) -> str:
+async def ticktick_get_tasks_due_today(params: GetTasksDueTodayInput, ctx: Context) -> str:
     """Get all tasks due today across every open project.
 
     Zero-parameter convenience tool. Returns tasks sorted by priority.
@@ -752,7 +752,7 @@ async def ticktick_get_tasks_due_today(params: GetTasksDueTodayInput, ctx=None) 
     name="ticktick_get_overdue_tasks",
     annotations={"title": "Overdue Tasks", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_get_overdue_tasks(params: GetOverdueTasksInput, ctx=None) -> str:
+async def ticktick_get_overdue_tasks(params: GetOverdueTasksInput, ctx: Context) -> str:
     """Get all overdue tasks across every open project, sorted by priority then age.
 
     Useful for morning reviews and identifying what needs immediate attention.
@@ -771,7 +771,7 @@ async def ticktick_get_overdue_tasks(params: GetOverdueTasksInput, ctx=None) -> 
     name="ticktick_get_engaged_tasks",
     annotations={"title": "Engaged Tasks (GTD)", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_get_engaged_tasks(params: GetEngagedTasksInput, ctx=None) -> str:
+async def ticktick_get_engaged_tasks(params: GetEngagedTasksInput, ctx: Context) -> str:
     """GTD 'Engaged' list: tasks that are high priority OR overdue.
 
     These are the tasks you should be actively working on right now.
@@ -790,7 +790,7 @@ async def ticktick_get_engaged_tasks(params: GetEngagedTasksInput, ctx=None) -> 
     name="ticktick_search_all_tasks",
     annotations={"title": "Search All Tasks", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_search_all_tasks(params: SearchAllTasksInput, ctx=None) -> str:
+async def ticktick_search_all_tasks(params: SearchAllTasksInput, ctx: Context) -> str:
     """Search for tasks across ALL open projects by title or content.
 
     Unlike ticktick_search_tasks which requires a project_id, this searches everywhere.
@@ -813,7 +813,7 @@ async def ticktick_search_all_tasks(params: SearchAllTasksInput, ctx=None) -> st
     name="ticktick_plan_day",
     annotations={"title": "Plan My Day", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_plan_day(params: PlanDayInput, ctx=None) -> str:
+async def ticktick_plan_day(params: PlanDayInput, ctx: Context) -> str:
     """Help structure your day from your task list.
 
     Pulls overdue + due today + high priority tasks, estimates time using
@@ -880,7 +880,7 @@ async def ticktick_plan_day(params: PlanDayInput, ctx=None) -> str:
     name="ticktick_daily_standup",
     annotations={"title": "Daily Standup Briefing", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_daily_standup(params: DailyStandupInput, ctx=None) -> str:
+async def ticktick_daily_standup(params: DailyStandupInput, ctx: Context) -> str:
     """Morning briefing: overdue tasks, due today, completed yesterday, and this week's horizon.
 
     Zero-parameter tool. Call this every morning for a structured view
@@ -948,7 +948,7 @@ async def ticktick_daily_standup(params: DailyStandupInput, ctx=None) -> str:
     name="ticktick_weekly_review",
     annotations={"title": "Weekly Review", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_weekly_review(params: WeeklyReviewInput, ctx=None) -> str:
+async def ticktick_weekly_review(params: WeeklyReviewInput, ctx: Context) -> str:
     """End-of-week analysis: completed vs planned, overdue trends, project breakdown.
 
     Shows what you accomplished, where you fell behind, and how the week compared.
@@ -1009,7 +1009,7 @@ async def ticktick_weekly_review(params: WeeklyReviewInput, ctx=None) -> str:
     name="ticktick_get_focus_stats",
     annotations={"title": "Focus Statistics", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_get_focus_stats(params: GetFocusStatsInput, ctx=None) -> str:
+async def ticktick_get_focus_stats(params: GetFocusStatsInput, ctx: Context) -> str:
     """Get Pomodoro/focus statistics for a time period.
 
     Returns total focus time, pomo count, and breakdowns.
@@ -1063,7 +1063,7 @@ async def ticktick_get_focus_stats(params: GetFocusStatsInput, ctx=None) -> str:
     name="ticktick_get_focus_heatmap",
     annotations={"title": "Focus Heatmap", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_get_focus_heatmap(params: GetFocusHeatmapInput, ctx=None) -> str:
+async def ticktick_get_focus_heatmap(params: GetFocusHeatmapInput, ctx: Context) -> str:
     """Get daily focus duration heatmap for a date range.
 
     Shows how much focus time you had each day. Useful for spotting patterns.
@@ -1089,7 +1089,7 @@ async def ticktick_get_focus_heatmap(params: GetFocusHeatmapInput, ctx=None) -> 
     name="ticktick_get_focus_distribution",
     annotations={"title": "Focus Distribution by Tag", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_get_focus_distribution(params: GetFocusDistributionInput, ctx=None) -> str:
+async def ticktick_get_focus_distribution(params: GetFocusDistributionInput, ctx: Context) -> str:
     """Get focus time broken down by tag for a date range.
 
     Shows which areas you spent the most focus time on.
@@ -1116,7 +1116,7 @@ async def ticktick_get_focus_distribution(params: GetFocusDistributionInput, ctx
     name="ticktick_get_productivity_score",
     annotations={"title": "Productivity Score", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_get_productivity_score(params: GetProductivityScoreInput, ctx=None) -> str:
+async def ticktick_get_productivity_score(params: GetProductivityScoreInput, ctx: Context) -> str:
     """Get your TickTick productivity/achievement score and general statistics.
 
     Includes level, score, pomo totals, task completion counts, and trends.
@@ -1153,7 +1153,7 @@ async def ticktick_get_productivity_score(params: GetProductivityScoreInput, ctx
     name="ticktick_list_habits",
     annotations={"title": "List Habits", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_list_habits(params: ListHabitsInput, ctx=None) -> str:
+async def ticktick_list_habits(params: ListHabitsInput, ctx: Context) -> str:
     """List all habits with current streak and settings.
 
     Shows habit name, type (boolean/quantitative), goal, frequency, and streak.
@@ -1186,7 +1186,7 @@ async def ticktick_list_habits(params: ListHabitsInput, ctx=None) -> str:
     name="ticktick_checkin_habit",
     annotations={"title": "Check In Habit", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_checkin_habit(params: CheckinHabitInput, ctx=None) -> str:
+async def ticktick_checkin_habit(params: CheckinHabitInput, ctx: Context) -> str:
     """Mark a habit as done for today (or a specific date).
 
     For boolean habits, just provide the habit_id.
@@ -1214,7 +1214,7 @@ async def ticktick_checkin_habit(params: CheckinHabitInput, ctx=None) -> str:
     name="ticktick_get_habit_stats",
     annotations={"title": "Habit Statistics", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_get_habit_stats(params: GetHabitStatsInput, ctx=None) -> str:
+async def ticktick_get_habit_stats(params: GetHabitStatsInput, ctx: Context) -> str:
     """Get habit performance data: completion rate, streak, history.
 
     Shows how consistent you've been with a specific habit.
@@ -1263,7 +1263,7 @@ async def ticktick_get_habit_stats(params: GetHabitStatsInput, ctx=None) -> str:
     name="ticktick_list_tags",
     annotations={"title": "List Tags", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_list_tags(params: ListTagsInput, ctx=None) -> str:
+async def ticktick_list_tags(params: ListTagsInput, ctx: Context) -> str:
     """List all tags. V2 API exposes full tag management that V1 doesn't.
 
     Requires V2 API credentials.
@@ -1288,7 +1288,7 @@ async def ticktick_list_tags(params: ListTagsInput, ctx=None) -> str:
     name="ticktick_create_tag",
     annotations={"title": "Create Tag", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
 )
-async def ticktick_create_tag(params: CreateTagInput, ctx=None) -> str:
+async def ticktick_create_tag(params: CreateTagInput, ctx: Context) -> str:
     """Create a new tag. Supports nesting via parent parameter.
 
     Requires V2 API credentials.
@@ -1310,7 +1310,7 @@ async def ticktick_create_tag(params: CreateTagInput, ctx=None) -> str:
     name="ticktick_rename_tag",
     annotations={"title": "Rename Tag", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def ticktick_rename_tag(params: RenameTagInput, ctx=None) -> str:
+async def ticktick_rename_tag(params: RenameTagInput, ctx: Context) -> str:
     """Rename an existing tag. All tasks with the old tag are updated automatically.
 
     Requires V2 API credentials.
