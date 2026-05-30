@@ -53,3 +53,80 @@ def test_sort_by_priority_then_date():
     assert [t["title"] for t in sorted_tasks] == [
         "High early", "High late", "Medium", "Low"
     ]
+
+
+# ---------------------------------------------------------------------------
+# filter_by_tags
+# ---------------------------------------------------------------------------
+
+def test_filter_by_tags_any():
+    from ticktick_mcp.queries import filter_by_tags
+    tasks = [
+        {"id": "1", "title": "a", "tags": ["launch", "blocker"]},
+        {"id": "2", "title": "b", "tags": ["chore"]},
+        {"id": "3", "title": "c"},  # no tags field
+    ]
+    result = filter_by_tags(tasks, ["blocker"], match="any")
+    assert [t["id"] for t in result] == ["1"]
+
+
+def test_filter_by_tags_all():
+    from ticktick_mcp.queries import filter_by_tags
+    tasks = [
+        {"id": "1", "title": "a", "tags": ["launch", "blocker"]},
+        {"id": "2", "title": "b", "tags": ["launch"]},
+    ]
+    result = filter_by_tags(tasks, ["launch", "blocker"], match="all")
+    assert [t["id"] for t in result] == ["1"]
+
+
+def test_filter_by_tags_case_and_hash_insensitive():
+    from ticktick_mcp.queries import filter_by_tags
+    tasks = [{"id": "1", "title": "a", "tags": ["Blocker"]}]
+    # Leading '#' and case are ignored on both the query and the task side.
+    assert filter_by_tags(tasks, ["#blocker"]) == tasks
+    assert filter_by_tags(tasks, ["BLOCKER"]) == tasks
+
+
+def test_filter_by_tags_empty_returns_input():
+    from ticktick_mcp.queries import filter_by_tags
+    tasks = [{"id": "1", "title": "a", "tags": ["x"]}]
+    assert filter_by_tags(tasks, []) is tasks
+
+
+# ---------------------------------------------------------------------------
+# group_by_horizon
+# ---------------------------------------------------------------------------
+
+def _iso(dt):
+    return dt.strftime("%Y-%m-%dT%H:%M:%S+0000")
+
+
+def test_group_by_horizon_one_bucket_each_and_excludes_completed():
+    from datetime import timedelta
+    from ticktick_mcp.queries import group_by_horizon
+    now = datetime.now(timezone.utc)
+    overdue_task = {"id": "ov", "title": "overdue", "status": 0,
+                    "dueDate": _iso(now - timedelta(days=3))}
+    week_task = {"id": "wk", "title": "this week", "status": 0,
+                 "dueDate": _iso(now + timedelta(days=3))}
+    later_task = {"id": "lt", "title": "later", "status": 0,
+                  "dueDate": _iso(now + timedelta(days=30))}
+    no_date_task = {"id": "nd", "title": "no date", "status": 0}
+    done_task = {"id": "dn", "title": "done", "status": 2,
+                 "dueDate": _iso(now - timedelta(days=1))}
+
+    buckets = group_by_horizon(
+        [overdue_task, week_task, later_task, no_date_task, done_task]
+    )
+
+    assert [t["id"] for t in buckets["overdue"]] == ["ov"]
+    assert [t["id"] for t in buckets["this_week"]] == ["wk"]
+    assert [t["id"] for t in buckets["later"]] == ["lt"]
+    assert [t["id"] for t in buckets["no_date"]] == ["nd"]
+
+    all_ids = [t["id"] for bucket in buckets.values() for t in bucket]
+    # Completed task is excluded from every bucket.
+    assert "dn" not in all_ids
+    # Each active task lands in exactly one bucket.
+    assert sorted(all_ids) == ["lt", "nd", "ov", "wk"]

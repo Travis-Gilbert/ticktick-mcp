@@ -127,6 +127,54 @@ def format_tasks_md(tasks: list[dict], project_name: str = "") -> str:
     return "\n".join(lines)
 
 
+# Ordered horizon buckets produced by queries.group_by_horizon, plus the
+# optional done_today bucket appended by the launch dashboard tool.
+DASHBOARD_BUCKET_TITLES = {
+    "overdue": "Overdue",
+    "today": "Due Today",
+    "this_week": "This Week",
+    "later": "Later",
+    "no_date": "No Date",
+    "done_today": "Done Today",
+}
+
+
+def format_dashboard_md(
+    buckets: dict[str, list[dict]],
+    tags: list[str] | None,
+    projects: dict[str, dict],
+) -> str:
+    """Format the launch dashboard horizon buckets as Markdown.
+
+    Each non-empty bucket becomes a section with a count; tasks render as
+    priority dot + title + project name + due date. `projects` maps
+    project_id -> project dict, used to resolve a task's list name when the
+    tool did not stamp `_project_name`.
+    """
+    tag_label = f" — {', '.join(tags)}" if tags else ""
+    total = sum(len(v) for v in buckets.values())
+    lines = [f"# Launch Dashboard{tag_label}", f"_{total} matching task(s)_"]
+
+    for key, title in DASHBOARD_BUCKET_TITLES.items():
+        items = buckets.get(key)
+        if not items:
+            continue
+        lines.append("")
+        lines.append(f"## {title} ({len(items)})")
+        for t in items:
+            icon = priority_icon(t.get("priority", 0)) or "⚪"
+            name = t.get("_project_name") or projects.get(t.get("projectId", ""), {}).get("name", "")
+            due = t.get("dueDate", "")[:10] if t.get("dueDate") else ""
+            suffix = " — " + " · ".join(p for p in (name, due) if p) if (name or due) else ""
+            lines.append(f"- {icon} {t.get('title', '?')}{suffix}")
+
+    if total == 0:
+        lines.append("")
+        lines.append("No matching tasks.")
+
+    return truncate_response("\n".join(lines))
+
+
 # ---------------------------------------------------------------------------
 # JSON formatter
 # ---------------------------------------------------------------------------

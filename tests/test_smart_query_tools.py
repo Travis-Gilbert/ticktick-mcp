@@ -16,10 +16,7 @@ def _make_mock_ctx(projects, project_data_map):
         side_effect=lambda pid: project_data_map.get(pid, {"tasks": []})
     )
     ctx = MagicMock()
-    ctx.request_context.lifespan_context = {
-        "ticktick": mock_client,
-        "ticktick_v2": None,
-    }
+    ctx.request_context.lifespan_context = {"ticktick": mock_client}
     return ctx
 
 

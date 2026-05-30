@@ -150,3 +150,60 @@ class TickTickClient:
         if isinstance(result, dict):
             return result.get("add", result.get("created", []))
         return result if isinstance(result, list) else []
+
+    async def move_tasks(self, moves: list[dict]) -> list[dict]:
+        """Move tasks between projects in one call.
+
+        moves: [{"fromProjectId": ..., "toProjectId": ..., "taskId": ...}, ...]
+
+        Tries the dedicated batch-move endpoint first. If that endpoint is
+        unavailable on the token (4xx), falls back to a per-task
+        get -> update(projectId) -> re-read loop that VERIFIES the move took,
+        rather than reporting a silent success (the Open API does not always
+        honor a projectId change on a task update).
+
+        Returns one result dict per move:
+            {"taskId", "fromProjectId", "toProjectId", "moved": bool,
+             "title"?: str, "error"?: str}
+        """
+        try:
+            await self._request("POST", "/project/task/move", json_body=moves)
+        except TickTickAPIError as e:
+            if e.status_code not in (400, 404, 405):
+                raise
+            return [await self._move_task_verified(m) for m in moves]
+        return [{**m, "moved": True} for m in moves]
+
+    async def _move_task_verified(self, move: dict) -> dict:
+        """Move one task via get-then-update, then verify by re-reading it."""
+        task_id = move["taskId"]
+        from_id = move["fromProjectId"]
+        to_id = move["toProjectId"]
+
+        task = await self.get_task(from_id, task_id)
+        title = task.get("title", "")
+        await self.update_task(
+            task_id, {"id": task_id, "projectId": to_id, "title": title}
+        )
+
+        moved = False
+        try:
+            check = await self.get_task(to_id, task_id)
+            moved = check.get("projectId") == to_id
+        except TickTickAPIError as e:
+            if e.status_code != 404:
+                raise
+
+        result = {
+            "taskId": task_id,
+            "fromProjectId": from_id,
+            "toProjectId": to_id,
+            "moved": moved,
+            "title": title,
+        }
+        if not moved:
+            result["error"] = (
+                "move did not take effect — task is not in the destination "
+                "project after update (the Open API may not honor moves on this token)"
+            )
+        return result

@@ -7,7 +7,7 @@ Field constraints catch bad input before it hits the API.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -397,98 +397,54 @@ class WeeklyReviewInput(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Focus / Pomodoro Models (Phase 4)
+# Launch Dashboard Model (cross-list rollup)
 # ---------------------------------------------------------------------------
 
-class GetFocusStatsInput(BaseModel):
-    """Input for focus/pomodoro statistics."""
+class LaunchDashboardInput(BaseModel):
+    """Input for the cross-list launch dashboard."""
     model_config = _STRICT_CONFIG
-    period: str = Field(
-        default="today",
-        description="Time period: 'today', 'week', 'month', or 'year'",
-        pattern="^(today|week|month|year)$",
+
+    project_ids: list[str] = Field(
+        ...,
+        min_length=1,
+        description="Project IDs to roll up (your product lists).",
     )
-    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
-
-
-class GetFocusHeatmapInput(BaseModel):
-    """Input for focus duration heatmap."""
-    model_config = _STRICT_CONFIG
-    date_from: str = Field(description="Start date in YYYYMMDD format (e.g., '20260201')")
-    date_to: str = Field(description="End date in YYYYMMDD format (e.g., '20260213')")
-    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
-
-
-class GetFocusDistributionInput(BaseModel):
-    """Input for focus time distribution by tag."""
-    model_config = _STRICT_CONFIG
-    date_from: str = Field(description="Start date in YYYYMMDD format")
-    date_to: str = Field(description="End date in YYYYMMDD format")
-    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
-
-
-class GetProductivityScoreInput(BaseModel):
-    """Input for productivity score and general statistics."""
-    model_config = _STRICT_CONFIG
-    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
-
-
-# ---------------------------------------------------------------------------
-# Habit Models (Phase 5)
-# ---------------------------------------------------------------------------
-
-class ListHabitsInput(BaseModel):
-    """Input for listing all habits."""
-    model_config = _STRICT_CONFIG
-    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
-
-
-class CheckinHabitInput(BaseModel):
-    """Input for checking in a habit."""
-    model_config = _STRICT_CONFIG
-    habit_id: str = Field(min_length=1, description="Habit ID")
-    date: str | None = Field(
+    tags: list[str] | None = Field(
         default=None,
-        description="Date in YYYYMMDD format (defaults to today)",
+        description="Optional tag filter, e.g. ['launch','blocker']. Leading '#' is ignored.",
     )
-    value: float | None = Field(
-        default=None,
-        description="For quantitative habits (e.g., glasses of water). Omit for boolean habits.",
+    match: Literal["any", "all"] = Field(
+        default="any",
+        description="Match any of the tags (default) or all of them.",
     )
-
-
-class GetHabitStatsInput(BaseModel):
-    """Input for habit statistics."""
-    model_config = _STRICT_CONFIG
-    habit_id: str = Field(min_length=1, description="Habit ID")
-    days: int = Field(
-        default=30,
-        ge=7, le=365,
-        description="Number of days of history to analyze",
+    include_completed_today: bool = Field(
+        default=False,
+        description="Append tasks completed since midnight as a 'done' bucket.",
     )
     response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
 
 
 # ---------------------------------------------------------------------------
-# Tag Models (Phase 6)
+# Batch Move Models
 # ---------------------------------------------------------------------------
 
-class ListTagsInput(BaseModel):
-    """Input for listing all tags."""
+class TaskMove(BaseModel):
+    """A single task move between projects (element of a batch move)."""
     model_config = _STRICT_CONFIG
+
+    task_id: str = Field(..., min_length=1, description="Task ID to move")
+    from_project_id: str = Field(..., min_length=1, description="Current project ID")
+    to_project_id: str = Field(..., min_length=1, description="Destination project ID")
+
+
+class BatchMoveInput(BaseModel):
+    """Input for moving multiple tasks between projects in one call."""
+    model_config = _STRICT_CONFIG
+
+    moves: list[TaskMove] = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Task moves to perform (max 50).",
+    )
     response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
-
-
-class CreateTagInput(BaseModel):
-    """Input for creating a tag."""
-    model_config = _STRICT_CONFIG
-    name: str = Field(min_length=1, max_length=100, description="Tag name")
-    color: str | None = Field(default=None, pattern=r"^#[0-9a-fA-F]{6}$")
-    parent: str | None = Field(default=None, description="Parent tag name for nesting")
-
-
-class RenameTagInput(BaseModel):
-    """Input for renaming a tag."""
-    model_config = _STRICT_CONFIG
-    old_name: str = Field(min_length=1, description="Current tag name")
-    new_name: str = Field(min_length=1, description="New tag name")

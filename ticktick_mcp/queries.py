@@ -115,3 +115,43 @@ def search_tasks(tasks: list[dict], query: str) -> list[dict]:
         if q in t.get("title", "").lower()
         or q in t.get("content", "").lower()
     ]
+
+
+def filter_by_tags(tasks: list[dict], tags: list[str], match: str = "any") -> list[dict]:
+    """Filter tasks by tag membership. match='any' (default) or 'all'.
+    Tag comparison is case-insensitive and ignores a leading '#'."""
+    if not tags:
+        return tasks
+    wanted = {t.lstrip("#").lower() for t in tags}
+    result = []
+    for task in tasks:
+        task_tags = {str(x).lstrip("#").lower() for x in task.get("tags", [])}
+        if match == "all":
+            if wanted.issubset(task_tags):
+                result.append(task)
+        else:
+            if wanted & task_tags:
+                result.append(task)
+    return result
+
+
+def group_by_horizon(tasks: list[dict]) -> dict[str, list[dict]]:
+    """Bucket active tasks into overdue / today / this_week / later / no_date.
+    Reuses the existing date logic so buckets stay consistent with the
+    standup and due-today tools."""
+    overdue = filter_overdue_tasks(tasks)
+    today = filter_due_today(tasks)
+    week = filter_due_this_week(tasks)
+    bucketed_ids = {t.get("id") for t in (*overdue, *today, *week)}
+    later, no_date = [], []
+    for task in tasks:
+        if not is_active(task) or task.get("id") in bucketed_ids:
+            continue
+        (later if parse_date(task.get("dueDate")) else no_date).append(task)
+    return {
+        "overdue": overdue,
+        "today": today,
+        "this_week": week,
+        "later": sort_by_priority_then_date(later),
+        "no_date": sort_by_priority_then_date(no_date),
+    }
